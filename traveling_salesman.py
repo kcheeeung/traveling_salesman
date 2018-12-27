@@ -156,14 +156,14 @@ class TravelingSalesman_GeneticAlgorithm():
                 child_b = np.array(gene_bj + gene_aj + gene_bk)
                 self.population.append(child_b)
             else:
-                # temp_a, temp_b = a[1:], b[1:]
-                # random.shuffle(temp_a)
-                # random.shuffle(temp_b)
-                # self.population.append(np.array([a[0]] + temp_a))
-                # self.population.append(np.array([b[0]] + temp_b))
+                temp_a, temp_b = a[1:], b[1:]
+                random.shuffle(temp_a)
+                random.shuffle(temp_b)
+                self.population.append(np.array([a[0]] + temp_a))
+                self.population.append(np.array([b[0]] + temp_b))
 
-                self.population.append(np.array(a))
-                self.population.append(np.array(b))
+                # self.population.append(np.array(a))
+                # self.population.append(np.array(b))
 
         # print(a, self.calculate_distance(np.array(a)))
         # print(b, self.calculate_distance(np.array(b)))
@@ -181,14 +181,27 @@ class TravelingSalesman_GeneticAlgorithm():
                     # Mutation at least 2 pieces long (adding +1)
                     if mut_0+1 < mut_1:
                         break
-                gene_ax = temp_gene[0:mut_0]
-                gene_bx = temp_gene[mut_1:]
-                segment = temp_gene[mut_0:mut_1]
-                random.shuffle(segment)
-                # Mutate gene
-                self.population[i] = np.array(gene_ax + segment + gene_bx)
-        else:
-            pass
+                # # Segment shuffle
+                # gene_ax = temp_gene[0:mut_0]
+                # gene_bx = temp_gene[mut_1:]
+                # segment = temp_gene[mut_0:mut_1]
+                # random.shuffle(segment)
+                # # Mutate gene
+                # self.population[i] = np.array(gene_ax + segment + gene_bx)
+                roll = random.random()
+                if roll < 0.5:
+                    # inversion operator
+                    gene_ax = temp_gene[0:mut_0]
+                    gene_bx = temp_gene[mut_1:]
+                    segment = temp_gene[mut_0:mut_1]
+                    segment = segment[::-1]
+                    # Mutate gene
+                    self.population[i] = np.array(gene_ax + segment + gene_bx)
+                else:
+                    # shift operator
+                    shift = random.randint(1, len(temp_gene))
+                    self.population[i] = np.array([temp_gene[0]] + temp_gene[shift:] + temp_gene[:shift])
+
         # Add elite individuals back to population
         self.population += self.elite_pop
 
