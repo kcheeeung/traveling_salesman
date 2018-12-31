@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import random
 from time import perf_counter as timer
@@ -14,8 +15,8 @@ class TravelingSalesman_GeneticAlgorithm():
         """
         self.points_to_visit  = points_to_visit
         self.index_home       = index_home
-        self.population_size  = 24
-        self.elite_size       = 3
+        self.population_size  = 10
+        self.elite_size       = 1
         self.crossover_chance = 0.9
         self.mutation_chance  = 0.1
         self.sequence_length  = None
@@ -23,6 +24,7 @@ class TravelingSalesman_GeneticAlgorithm():
         self.population = []
         self.best_gene  = None
         self.best_dist  = None
+        self.history    = []
 
         self.initialize_population()
         self.set_best_gene()
@@ -44,6 +46,14 @@ class TravelingSalesman_GeneticAlgorithm():
     #         y = gene[i][1]-gene[i+1][1]
     #         dist += (x*x + y*y)**0.5
     #     return dist
+
+    def graph(self):
+        x = range(len(self.history))
+        y = self.history
+        plt.plot(x, y)
+        plt.xlabel("Generations")
+        plt.ylabel("Best Value")
+        plt.show()
 
     def initialize_population(self):
         home = self.points_to_visit[self.index_home]
@@ -89,6 +99,9 @@ class TravelingSalesman_GeneticAlgorithm():
         if current_best_dist < self.best_dist:
             self.best_dist = current_best_dist
             self.best_gene = self.population[current_best_index]
+            self.history.append(current_best_dist)
+        else:
+            self.history.append(self.best_dist)
 
     def selection(self):
         """
@@ -290,6 +303,7 @@ def main():
 
     TSP_GA = TravelingSalesman_GeneticAlgorithm(points_to_visit, start_index)
     TSP_GA.run_algorithm(1000)
+    TSP_GA.graph()
 
 if __name__ == '__main__':
     start_time = timer()
