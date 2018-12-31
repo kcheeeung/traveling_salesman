@@ -14,16 +14,12 @@ class TravelingSalesman_GeneticAlgorithm():
         """
         self.points_to_visit  = points_to_visit
         self.index_home       = index_home
-        self.population_size  = 40
-        self.elite_size       = 12
+        self.population_size  = 4
+        self.elite_size       = 2
         self.crossover_chance = 0.9
         self.mutation_chance  = 0.2
 
         self.population = []
-        self.distance   = []
-        self.fitness    = []
-        self.roulette   = []
-
         self.parents    = []
         self.elite_pop  = []
 
@@ -32,13 +28,15 @@ class TravelingSalesman_GeneticAlgorithm():
     def run_algorithm(self, generations):
         for _ in range(generations):
             self.selection()
-            self.crossover()
-            self.mutate()
+            # self.crossover()
+            # self.mutate()
 
     def calculate_distance(self, gene):
         dist = 0
         for i in range(len(gene) - 1):
-            dist += np.linalg.norm(gene[i]-gene[i+1])
+            x = gene[i][0]-gene[i+1][0]
+            y = gene[i][1]-gene[i+1][1]
+            dist += (x*x + y*y)**0.5
         return dist
 
     def initialize_population(self):
@@ -61,50 +59,59 @@ class TravelingSalesman_GeneticAlgorithm():
         """
         Selection
         """
-        # Calculate distance
-        del self.distance[0:]
+        # Calculate relative distance (does not square root)
+        distance = []
         total_dist = 0
         for gene in self.population:
             dist = 0
-            for i in range(len(gene) - 1):
-                dist += np.linalg.norm(gene[i]-gene[i+1])
+            for i in range(len(gene)-1):
+                x = gene[i][0]-gene[i+1][0]
+                y = gene[i][1]-gene[i+1][1]
+                dist += x*x + y*y
             total_dist += dist
-            self.distance.append(dist)
+            distance.append(dist)
 
-        # Calculate fitness
-        del self.fitness[0:]
-        for i in range(len(self.population)):
-            self.fitness.append(1/(self.population_size-1)*(1 - self.distance[i]/total_dist))
-
-        # Create roulette
-        del self.roulette[0:]
+        # Calculate fitness and create roulette
+        fitness  = []
+        roulette = []
         chance = 0
-        for i in self.fitness:
-            chance += i
-            self.roulette.append(chance)
+        for i in range(len(self.population)):
+            # Fitness
+            fitness.append(1/(self.population_size-1)*(1 - distance[i]/total_dist))
+            # Roulette
+            chance += fitness[i]
+            roulette.append(chance)
+
+        print(distance)
+        print(fitness)
+        print(roulette)
 
         # Locate best n elites
         del self.elite_pop[0:]
-        temp_fitness = self.fitness[0:]
         temp_elite_list = []
         for _ in range(self.elite_size):
             # Find index of elite individual
-            max_elite_fit = max(temp_fitness)
-            elite_index = self.fitness.index(max_elite_fit)
+            max_elite_fit = max(fitness)
+            elite_index = fitness.index(max_elite_fit)
             # Clone elite
             temp_elite_list.append(self.population[elite_index])
-            temp_fitness[elite_index] = -999
+            fitness[elite_index] = -999
+
+        print('helllllllllllllll')
+        print(distance)
+        print(fitness)
+        print(roulette)
 
         # Roulette selection of parents
         while True:
             roll_a, roll_b = random.random(), random.random()
             parent_a_index, parent_b_index = 0, 0
-            for element in self.roulette:
+            for element in roulette:
                 if roll_a > element:
                     parent_a_index += 1
                 else:
                     break
-            for element in self.roulette:
+            for element in roulette:
                 if roll_b > element:
                     parent_b_index += 1
                 else:
@@ -116,13 +123,12 @@ class TravelingSalesman_GeneticAlgorithm():
         self.parents.append(self.population[parent_a_index])
         self.parents.append(self.population[parent_b_index])
         # Clone elites
-        for individual in temp_elite_list:
-            self.elite_pop.append(individual)
+        self.elite_pop += temp_elite_list
 
         # print("Average dist", total_dist/self.population_size)
-        # print("Distance:", self.distance)
-        # print("Fitness :", self.fitness)
-        # print("Roulette:", self.roulette)
+        # print("Distance:", distance)
+        # print("Fitness :", fitness)
+        # print("Roulette:", roulette)
         # print("Elite 0 :", self.elite_pop[0])
         print("Elite dist:", self.calculate_distance(self.elite_pop[0]))
 
@@ -161,12 +167,6 @@ class TravelingSalesman_GeneticAlgorithm():
                 random.shuffle(temp_b)
                 self.population.append(np.array([a[0]] + temp_a))
                 self.population.append(np.array([b[0]] + temp_b))
-
-                # self.population.append(np.array(a))
-                # self.population.append(np.array(b))
-
-        # print(a, self.calculate_distance(np.array(a)))
-        # print(b, self.calculate_distance(np.array(b)))
 
     def mutate(self):
         """
@@ -215,16 +215,16 @@ def initalize_binary_ndarray():
     [[row, column]], [row, column], ...]
     """
     # Test matrix
-    matrix = np.array([[0, 1, 0, 0, 0, 0, 0, 0, 0],
-                       [0, 1, 0, 0, 0, 0, 1, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 1, 0, 0, 0, 1],
-                       [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    matrix = np.array([[0, 0, 0, 0, 1, 0, 0, 0, 0],
                        [0, 1, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 1, 0],
                        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                       [1, 0, 0, 1, 0, 0, 0, 0, 1]])
+                       [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 1, 0, 0, 0, 0, 0, 1, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 1, 1, 0, 0, 1, 0, 0]])
 
     # rows = 10
     # cols = 10
@@ -263,7 +263,7 @@ def main():
     start_index = starting_point(points_to_visit)
 
     TSP_GA = TravelingSalesman_GeneticAlgorithm(points_to_visit, start_index)
-    TSP_GA.run_algorithm(1000)
+    TSP_GA.run_algorithm(1)
 
 if __name__ == '__main__':
     start_time = timer()
