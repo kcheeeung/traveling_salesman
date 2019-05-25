@@ -1,6 +1,6 @@
 # Traveling Salesman Problem
 The traveling salesman problem was first proposed in the 1800s by the mathematician W.R. Hamilton and Thomas Kirkman. This NP-hard problem asks, for a given set of nodes, what is the optimal path to visit all nodes exactly once, minimizing the distance and returning back to the home position. In this implementation, I employ the use of a heuristic search algorithm premised on the evolutionary ideas of natural selection and genetics for a one-way traveling salesman.
-![TSP-GA Results](/images/sample1.png)
+![TSP-GA Results](/images/Figure_1.png)
 
 ## Clone and test for yourself!
 #### Dependencies: matplotlib.pyplot, numpy, random, time
