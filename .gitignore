@@ -1,3 +1,5 @@
-.vs
-.vscode
+.vs/
+.vscode/
+out/
 *.iml
+*.class
