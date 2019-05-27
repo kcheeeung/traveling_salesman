@@ -1,6 +1,7 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -26,14 +27,16 @@ public class TSP {
     private ArrayHeapMinPQ<Individual> minheap;
     private double[] roulette;
     private float[] history;
+    private float startDist;
 
     /**
      * Utilizes a genetic algorithm in order to solve the traveling salesman problem
      * Implements a dummy point (0, 0) to solve a one-way variant of the TSP problem
      * @param arr int[][] consisting of binary points to visit
      * @param iterations number of generations to iterate over
+     * @param historyOn whether to record the best's history
      */
-    public TSP(int[][] arr, int iterations) {
+    public TSP(int[][] arr, int iterations, boolean historyOn) {
         long start = clock();
         minheap = new ArrayHeapMinPQ<>();
         population = new Individual[POPULATION_SIZE];
@@ -55,7 +58,9 @@ public class TSP {
             crossover();
             mutate();
             
-            history[i] = best.getDistance();
+            if (historyOn) {
+                history[i] = best.getDistance();
+            }
 
             minheap.clear();
             populationToMinHeap();
@@ -99,7 +104,8 @@ public class TSP {
             population[i] = new Individual(refIndexToVisit);
             minheap.add(population[i], population[i].getDistance());
         }
-        System.out.println("Start distance: " + minheap.getSmallest().getDistance());
+        startDist = minheap.getSmallest().getDistance();
+        System.out.println("Start distance: " + startDist);
     }
 
     /**
@@ -223,46 +229,59 @@ public class TSP {
     }
 
     /** 
-     * Prints the best final distance
+     * Prints the best stats
      */
     public void printBest() {
         System.out.print("Best distance: ");
         System.out.println(best.getDistance());
+        System.out.printf("Improved by: %.2f%%", startDist / best.getDistance() * 100 - 100);
+        // for (Point p : getVisitSequence()) {
+        //     System.out.print(p + " ");
+        // }
+    }
+
+    public Individual getBest() {
+        return best;
+    }
+
+    public List<Point> getVisitSequence() {
+        int[] seq = best.getSequence();
+        List<Point> result = new ArrayList<>(seq.length);
+        for (int i = 0; i < numToVisit; i++) {
+            result.add(pointsToVisit[seq[i]]);
+        }
+        return result;
     }
 
     public void writeHistory() {
         try {
-            StringBuilder string = new StringBuilder();
+            StringBuilder result = new StringBuilder();
             BufferedWriter out = new BufferedWriter(new FileWriter("savefile.txt"));
             for (int i = 0; i < history.length; i++) {
-                string.append(history[i]);
-                string.append("\n");
+                result.append(history[i]);
+                result.append("\n");
             }
-            out.write(string.toString());
+            out.write(result.toString());
             out.close();
         } catch (Exception e) {
             System.out.println("Write failed");
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
     
     public static void main(String[] args) {
-        int[][] array = {{0, 0, 1, 0, 1, 0, 0, 1, 0},
-                         {0, 1, 0, 0, 0, 0, 0, 0, 0},
-                         {0, 0, 0, 1, 0, 0, 0, 1, 0},
-                         {0, 0, 1, 0, 0, 0, 0, 0, 0},
-                         {1, 0, 0, 0, 1, 0, 1, 0, 0},
-                         {0, 1, 0, 0, 0, 0, 0, 0, 0},
-                         {0, 0, 0, 1, 0, 0, 0, 0, 0},
-                         {1, 1, 1, 0, 0, 0, 0, 1, 0},
-                         {1, 0, 0, 0, 0, 0, 0, 0, 0},
-                         {1, 0, 1, 1, 0, 0, 1, 0, 0}};
-        
-        // int[][] array = {{1, 0, 1},
-        //                  {1, 1, 0}};
+        int size = 50;
+        int[][] array = new int[size][size];
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[0].length; j++) {
+                if (random.nextDouble() < 0.5) {
+                    array[i][j] = 1;                    
+                }
+            }
+        }
 
         /* Starting Point */
-        TSP tsp = new TSP(array, 1000);
+        TSP tsp = new TSP(array, 1000, false);
         tsp.printBest();
         // tsp.writeHistory();
     }

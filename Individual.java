@@ -202,7 +202,7 @@ public class Individual {
      * Prints the sequence
      */
     public void printSequence() {
-        StringBuilder temp = new StringBuilder();
+        StringBuilder temp = new StringBuilder(sequence.length * 2);
         for (int i : sequence) {
             temp.append(i);
             temp.append(" ");
@@ -219,7 +219,7 @@ public class Individual {
 
     @Override
     public String toString() {
-        StringBuilder temp = new StringBuilder();
+        StringBuilder temp = new StringBuilder(sequence.length * 2);
         for (int i : sequence) {
             temp.append(i);
             temp.append(" ");

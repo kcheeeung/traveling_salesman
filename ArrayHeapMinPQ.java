@@ -13,7 +13,7 @@ public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T> {
     private class Node<J> {
         private J item;
         private double priority;
-
+        
         public Node(J i, double p) {
             item = i;
             priority = p;
@@ -39,7 +39,7 @@ public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T> {
         pqheap = (Node<T>[]) new Node[CAPACITY];
         pqheap[0] = null;
         size = 1;
-        itemIndex = new HashMap<>();
+        itemIndex = new HashMap<>((int) (CAPACITY / 0.75f) + 1);
     }
 
     @Override
@@ -81,18 +81,18 @@ public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T> {
         int minIndex = parentIndex;
         int left = leftIndex(parentIndex);
         int right = rightIndex(parentIndex);
-        if (inRange(left) && pqheap[left].priority < pqheap[minIndex].priority) {
+        if (left <= size() && pqheap[left].priority < pqheap[minIndex].priority) {
             minIndex = left;
         }
-        if (inRange(right) && pqheap[right].priority <  pqheap[minIndex].priority) {
+        if (right <= size() && pqheap[right].priority <  pqheap[minIndex].priority) {
             minIndex = right;
         }
         return minIndex;
     }
 
-    private boolean inRange(int i) {
-        return i <= size();
-    }
+    // private boolean inRange(int i) {
+    //     return i <= size();
+    // }
 
     private void pSink(int currentIndex) {
         int sinkIndex = findMin(currentIndex);
@@ -187,8 +187,9 @@ public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T> {
     }
 
     public void clear() {
-        pqheap = (Node<T>[]) new Node[CAPACITY];
-        pqheap[0] = null;
+        for (int i = 1; i < pqheap.length; i++) {
+            pqheap[i] = null;
+        }
         size = 1;
         itemIndex.clear();
     }
